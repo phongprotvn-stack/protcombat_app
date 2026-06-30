@@ -1,0 +1,290 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #E6002D;
+  --color-primary-dark: #D60032;
+  --color-primary-light: #FF4B3A;
+  --color-win: #E6002D;
+  --color-loss: #707070;
+  --color-surface: #F8F8FA;
+  --color-card: #FFFFFF;
+  --color-text-primary: #101010;
+  --color-text-secondary: #6B7280;
+  --color-text-muted: #9CA3AF;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+  background: #F8F8FA;
+  color: #101010;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Glassmorphism */
+.glass {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.glass-nav {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* Cards */
+.card {
+  background: #FFFFFF;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.card:active {
+  transform: scale(0.98);
+}
+
+/* Bottom nav */
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 6px 0;
+  flex: 1;
+  position: relative;
+}
+.nav-item.active .nav-icon {
+  color: #E6002D;
+}
+.nav-item.active .nav-label {
+  color: #E6002D;
+  font-weight: 700;
+}
+.nav-icon {
+  font-size: 22px;
+  color: #9CA3AF;
+  transition: color 0.2s ease;
+}
+.nav-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #9CA3AF;
+  transition: color 0.2s ease;
+}
+
+/* Segmented control */
+.segmented {
+  display: flex;
+  background: #F3F4F6;
+  border-radius: 12px;
+  padding: 3px;
+  gap: 2px;
+}
+.segmented button {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6B7280;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.segmented button.active {
+  background: #FFFFFF;
+  color: #E6002D;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+/* Merged input */
+.merged-input {
+  display: flex;
+  align-items: center;
+  background: #F9FAFB;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #F3F4F6;
+}
+.merged-input .field {
+  flex: 1;
+  text-align: center;
+  padding: 10px 4px;
+}
+.merged-input .field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #9CA3AF;
+  margin-bottom: 2px;
+}
+.merged-input .field .value {
+  font-size: 24px;
+  font-weight: 800;
+  color: #101010;
+  cursor: pointer;
+}
+.merged-input .divider {
+  width: 1px;
+  height: 36px;
+  background: #E5E7EB;
+}
+.swap-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #F3F4F6;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #6B7280;
+  transition: all 0.2s;
+}
+.swap-btn:active {
+  transform: rotate(180deg);
+  background: #E6002D;
+  color: white;
+}
+
+/* Action field */
+.action-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.action-field:active {
+  opacity: 0.7;
+}
+.af-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #101010;
+}
+.af-value {
+  font-size: 14px;
+  color: #6B7280;
+}
+.af-arrow {
+  font-size: 20px;
+  color: #D1D5DB;
+  margin-left: 4px;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #101010;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 1000;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 4px;
+}
+
+/* Prevent pull-to-refresh on mobile */
+html {
+  overscroll-behavior: none;
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.screen-enter {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Scrollable screen container */
+.screen {
+  height: 100%;
+  overflow-y: auto;
+  padding-bottom: 90px;
+  padding-top: 56px;
+}
+
+/* Gray result dropdown */
+.result-dropdown {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+.result-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 14px;
+  border: 2px solid transparent;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+.result-btn.win {
+  background: rgba(230, 0, 45, 0.08);
+  color: #E6002D;
+}
+.result-btn.win.active {
+  background: #E6002D;
+  color: white;
+  border-color: #E6002D;
+}
+.result-btn.loss {
+  background: #F3F4F6;
+  color: #6B7280;
+}
+.result-btn.loss.active {
+  background: #707070;
+  color: white;
+  border-color: #707070;
+}
