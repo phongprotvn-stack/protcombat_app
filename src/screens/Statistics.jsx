@@ -7,143 +7,88 @@ export default function Statistics() {
   const lang = settings.lang;
   const [timeFilter, setTimeFilter] = useState('all');
 
-  // Simple opponent analysis
   const opponentStats = {};
   matches.forEach(m => {
     const name = m.opponent || t('anonymous', lang);
-    if (!opponentStats[name]) {
-      opponentStats[name] = { total: 0, wins: 0, losses: 0, totalScore: 0, opScore: 0 };
-    }
+    if (!opponentStats[name]) opponentStats[name] = { total: 0, wins: 0, losses: 0 };
     opponentStats[name].total++;
-    opponentStats[name].totalScore += m.myScore || 0;
-    opponentStats[name].opScore += m.opScore || 0;
-    if (m.result === 'win') opponentStats[name].wins++;
-    else opponentStats[name].losses++;
+    if (m.result === 'win') opponentStats[name].wins++; else opponentStats[name].losses++;
   });
-
-  const opponentList = Object.entries(opponentStats)
-    .sort((a, b) => b[1].total - a[1].total)
-    .slice(0, 10);
+  const opponentList = Object.entries(opponentStats).sort((a, b) => b[1].total - a[1].total).slice(0, 10);
 
   return (
-    <div className="screen screen-enter">
-      <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <div className="screen screen-enter" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 20px)' }}>
+      <div style={{ padding: '0 var(--space-page-x)', display: 'flex', flexDirection: 'column', gap: 'var(--space-card-gap)' }}>
 
-        {/* Header */}
-        <div style={{ fontSize: 18, fontWeight: 900, color: '#101010', paddingTop: 8 }}>
-          {t('statsTitle', lang)}
+        <div className="h2">{t('statsTitle', lang).replace('📊 ', '')}</div>
+
+        <div className="segmented">
+          <button className={timeFilter === 'all' ? 'active' : ''} onClick={() => setTimeFilter('all')}>{t('all', lang)}</button>
+          <button className={timeFilter === 'month' ? 'active' : ''} onClick={() => setTimeFilter('month')}>{t('month', lang)}</button>
+          <button className={timeFilter === 'week' ? 'active' : ''} onClick={() => setTimeFilter('week')}>{t('week', lang)}</button>
         </div>
 
-        {/* Time Filter */}
-        <div className="segmented" style={{ maxWidth: 320 }}>
-          <button className={timeFilter === 'all' ? 'active' : ''} onClick={() => setTimeFilter('all')}>
-            {t('all', lang)}
-          </button>
-          <button className={timeFilter === 'month' ? 'active' : ''} onClick={() => setTimeFilter('month')}>
-            {t('month', lang)}
-          </button>
-          <button className={timeFilter === 'week' ? 'active' : ''} onClick={() => setTimeFilter('week')}>
-            {t('week', lang)}
-          </button>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-card-gap)' }}>
+          <KpiCard label={t('totalMatches', lang)} value={stats.totalMatches} sub={`${t('totalWins', lang).replace('📊 ', '')}: ${stats.totalWins}`} />
+          <KpiCard label={t('winRate', lang)} value={`${stats.winRate}%`} sub={`${t('totalLosses', lang).replace('📊 ', '')}: ${stats.totalLosses}`} accent />
+          <KpiCard label={t('bestStreak', lang)} value={stats.bestStreak.best} sub={`${t('winStreak', lang)}: ${stats.bestStreak.current}`} />
+          <KpiCard label={t('avgScore', lang)} value={stats.avgScore} />
         </div>
 
-        {/* KPI Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          <div className="card">
-            <div style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 600 }}>{t('totalMatches', lang)}</div>
-            <div style={{ fontSize: 28, fontWeight: 900, color: '#101010', marginTop: 4 }}>{stats.totalMatches}</div>
-            <div style={{ fontSize: 11, color: '#E6002D', marginTop: 2 }}>{t('totalWins', lang).replace('📊 ', '')}: {stats.totalWins}</div>
-          </div>
-          <div className="card">
-            <div style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 600 }}>{t('winRate', lang)}</div>
-            <div style={{ fontSize: 28, fontWeight: 900, color: '#E6002D', marginTop: 4 }}>{stats.winRate}%</div>
-            <div style={{ fontSize: 11, color: '#707070', marginTop: 2 }}>{t('totalLosses', lang).replace('📊 ', '')}: {stats.totalLosses}</div>
-          </div>
-          <div className="card">
-            <div style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 600 }}>{t('bestStreak', lang)}</div>
-            <div style={{ fontSize: 28, fontWeight: 900, color: '#101010', marginTop: 4 }}>{stats.bestStreak.best}</div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>{t('winStreak', lang)}: {stats.bestStreak.current}</div>
-          </div>
-          <div className="card">
-            <div style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 600 }}>{t('avgScore', lang)}</div>
-            <div style={{ fontSize: 28, fontWeight: 900, color: '#101010', marginTop: 4 }}>{stats.avgScore}</div>
-          </div>
-        </div>
-
-        {/* Opponent Analysis */}
         <div>
-          <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 10, color: '#101010' }}>
-            {t('opponentAnalysis', lang)}
-          </div>
+          <div className="title" style={{ marginBottom: 12 }}>{t('opponentAnalysis', lang).replace('📊 ', '')}</div>
           {opponentList.length === 0 ? (
-            <div className="card" style={{ textAlign: 'center', color: '#9CA3AF', padding: '20px' }}>
+            <div className="card" style={{ textAlign: 'center', color: 'var(--color-text-muted)', padding: 20 }}>
               {lang === 'vi' ? 'Chưa có dữ liệu' : 'No data yet'}
             </div>
           ) : (
-            opponentList.map(([name, data]) => {
-              const wr = data.total > 0 ? Math.round((data.wins / data.total) * 100) : 0;
-              return (
-                <div key={name} className="card" style={{
-                  marginBottom: 8,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '12px 14px',
-                }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#101010' }}>{name}</div>
-                    <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>
-                      {data.total} {t('totalMatches', lang).toLowerCase()} · {data.wins}W - {data.losses}L
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {opponentList.map(([name, data]) => {
+                const wr = data.total > 0 ? Math.round((data.wins / data.total) * 100) : 0;
+                return (
+                  <div key={name} className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text-primary)' }}>{name}</div>
+                      <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2 }}>
+                        {data.total} {t('totalMatches', lang).toLowerCase()} · {data.wins}W - {data.losses}L
+                      </div>
                     </div>
+                    <div style={{ fontSize: 17, fontWeight: 800, color: wr >= 50 ? 'var(--color-primary)' : 'var(--color-text-secondary)' }}>{wr}%</div>
                   </div>
-                  <div style={{
-                    fontSize: 16,
-                    fontWeight: 900,
-                    color: wr >= 50 ? '#E6002D' : '#707070',
-                  }}>
-                    {wr}%
-                  </div>
-                </div>
-              );
-            })
+                );
+              })}
+            </div>
           )}
         </div>
 
-        {/* Recent Match List */}
         {matches.length > 0 && (
           <div>
-            <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 10, color: '#101010' }}>
-              {lang === 'vi' ? 'Lịch sử trận đấu' : 'Match History'}
+            <div className="title" style={{ marginBottom: 12 }}>{lang === 'vi' ? 'Lịch sử trận đấu' : 'Match History'}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {matches.map((m) => (
+                <div key={m.id} className="card" style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 9, height: 9, borderRadius: '50%', background: m.result === 'win' ? 'var(--grad-primary)' : '#D1D5DB', flexShrink: 0 }} />
+                  <div style={{ flex: 1, fontSize: 13, fontWeight: 700 }}>
+                    {m.myScore || 0} – {m.opScore || 0}
+                    <span style={{ fontWeight: 500, color: 'var(--color-text-muted)', marginLeft: 8 }}>vs {m.opponent || t('anonymous', lang)}</span>
+                  </div>
+                  <div style={{ fontSize: 10, color: 'var(--color-text-muted)', fontWeight: 600 }}>{formatDate(m.date)}</div>
+                </div>
+              ))}
             </div>
-            {matches.map((m) => (
-              <div key={m.id} className="card" style={{
-                marginBottom: 8,
-                padding: '10px 14px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-              }}>
-                <div style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  background: m.result === 'win' ? '#E6002D' : '#707070',
-                  flexShrink: 0,
-                }} />
-                <div style={{ flex: 1, fontSize: 13, fontWeight: 700 }}>
-                  {m.myScore || 0} – {m.opScore || 0}
-                  <span style={{ fontWeight: 500, color: '#9CA3AF', marginLeft: 6 }}>
-                    vs {m.opponent || t('anonymous', lang)}
-                  </span>
-                </div>
-                <div style={{ fontSize: 10, color: '#9CA3AF', fontWeight: 500 }}>
-                  {formatDate(m.date)}
-                </div>
-              </div>
-            ))}
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function KpiCard({ label, value, sub, accent }) {
+  return (
+    <div className="card">
+      <div className="caption">{label}</div>
+      <div style={{ fontSize: 30, fontWeight: 800, color: accent ? 'var(--color-primary)' : 'var(--color-text-primary)', marginTop: 6 }}>{value}</div>
+      {sub && <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 4, fontWeight: 600 }}>{sub}</div>}
     </div>
   );
 }

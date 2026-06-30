@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { db } from '../firebase/firebase';
-import { collection, addDoc, updateDoc, deleteDoc, doc, query, orderBy, onSnapshot, setDoc } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, deleteDoc, doc, query, orderBy, onSnapshot } from 'firebase/firestore';
 
 const AppContext = createContext();
 
@@ -11,6 +11,7 @@ const defaultSettings = {
   lang: 'vi',
   theme: 'light',
   loggedIn: false,
+  displayName: '',
 };
 
 export function AppProvider({ children }) {
@@ -34,9 +35,7 @@ export function AppProvider({ children }) {
 
   const [activeTab, setActiveTab] = useState('home');
   const [firebaseReady, setFirebaseReady] = useState(false);
-  const [syncing, setSyncing] = useState(false);
 
-  // Firestore listener
   useEffect(() => {
     try {
       const q = query(collection(db, 'matches'), orderBy('createdAt', 'desc'));
@@ -59,7 +58,6 @@ export function AppProvider({ children }) {
     }
   }, []);
 
-  // Save matches to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(matches));
@@ -68,7 +66,6 @@ export function AppProvider({ children }) {
     }
   }, [matches]);
 
-  // Save settings
   useEffect(() => {
     try {
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
@@ -77,7 +74,6 @@ export function AppProvider({ children }) {
     }
   }, [settings]);
 
-  // Apply theme
   useEffect(() => {
     document.documentElement.classList.toggle('dark', settings.theme === 'dark');
   }, [settings.theme]);
@@ -88,7 +84,6 @@ export function AppProvider({ children }) {
       id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
       createdAt: new Date().toISOString(),
     };
-    // Add to Firestore if available
     try {
       await addDoc(collection(db, 'matches'), newMatch);
     } catch (e) {
@@ -123,7 +118,6 @@ export function AppProvider({ children }) {
     setSettings(prev => ({ ...prev, theme: prev.theme === 'light' ? 'dark' : 'light' }));
   }, []);
 
-  // Computed stats
   const stats = {
     totalMatches: matches.length,
     totalWins: matches.filter(m => m.result === 'win').length,
@@ -141,7 +135,6 @@ export function AppProvider({ children }) {
           current = 0;
         }
       }
-      // Current streak
       let curStr = 0;
       for (const m of matches) {
         if (m.result === 'win') curStr++;
@@ -159,6 +152,7 @@ export function AppProvider({ children }) {
     settings,
     activeTab,
     stats,
+    firebaseReady,
     addMatch,
     updateMatch,
     deleteMatch,

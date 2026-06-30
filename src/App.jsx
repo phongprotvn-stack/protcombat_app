@@ -1,4 +1,5 @@
 import { useRef, useEffect } from 'react';
+import { Home as HomeIcon, PlusCircle, BarChart3, Lightbulb, User } from 'lucide-react';
 import { useApp } from './contexts/AppContext';
 import { t } from './i18n';
 import Home from './screens/Home';
@@ -8,11 +9,11 @@ import Insights from './screens/Insights';
 import Account from './screens/Account';
 
 const navItems = [
-  { id: 'home', icon: '🏠', labelKey: 'home' },
-  { id: 'record', icon: '➕', labelKey: 'record' },
-  { id: 'stats', icon: '📊', labelKey: 'stats' },
-  { id: 'insights', icon: '💡', labelKey: 'insights' },
-  { id: 'account', icon: '👤', labelKey: 'account' },
+  { id: 'home', Icon: HomeIcon, labelKey: 'home' },
+  { id: 'record', Icon: PlusCircle, labelKey: 'record' },
+  { id: 'stats', Icon: BarChart3, labelKey: 'stats' },
+  { id: 'insights', Icon: Lightbulb, labelKey: 'insights' },
+  { id: 'account', Icon: User, labelKey: 'account' },
 ];
 
 export default function App() {
@@ -20,7 +21,6 @@ export default function App() {
   const lang = settings.lang;
   const appRef = useRef(null);
 
-  // Prevent pull-to-refresh
   useEffect(() => {
     const el = appRef.current;
     if (!el) return;
@@ -54,84 +54,24 @@ export default function App() {
         overflow: 'hidden',
       }}
     >
-      {/* Glass Header */}
-      <header
-        className="glass"
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 50,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '12px 16px',
-          paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)',
-        }}
-      >
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          lineHeight: 1.2,
-        }}>
-          <h1 style={{
-            fontSize: 16,
-            fontWeight: 900,
-            color: '#101010',
-            letterSpacing: -0.3,
-          }}>
-            {t('appName', lang)}
-          </h1>
-          <span style={{
-            fontSize: 9,
-            fontWeight: 700,
-            color: '#E6002D',
-            textTransform: 'uppercase',
-            letterSpacing: 1,
-            fontFamily: 'monospace',
-          }}>
-            {t('slogan', lang)}
-          </span>
-        </div>
-      </header>
-
-      {/* Main content */}
-      <main style={{
-        flex: 1,
-        overflow: 'hidden',
-        position: 'relative',
-      }}>
+      <main style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
         {renderScreen()}
       </main>
 
       {/* Floating Bottom Navigation */}
-      <nav
-        className="glass-nav"
-        style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 50,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-around',
-          padding: '6px 8px',
-          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 6px)',
-        }}
-      >
-        {navItems.map((item) => {
-          const isActive = activeTab === item.id;
+      <nav className="floating-nav">
+        {navItems.map(({ id, Icon, labelKey }) => {
+          const isActive = activeTab === id;
           return (
             <div
-              key={item.id}
+              key={id}
               className={`nav-item ${isActive ? 'active' : ''}`}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => setActiveTab(id)}
             >
-              <span className="nav-icon">{item.icon}</span>
-              <span className="nav-label">{t(item.labelKey, lang)}</span>
+              <span className="nav-icon">
+                <Icon size={24} strokeWidth={isActive ? 2.4 : 2} fill={isActive ? 'currentColor' : 'none'} fillOpacity={isActive ? 0.15 : 0} />
+              </span>
+              <span className="nav-label">{t(labelKey, lang)}</span>
             </div>
           );
         })}
