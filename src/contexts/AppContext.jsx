@@ -1,4 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { db } from '../firebase/firebase';
+import { collection, addDoc, updateDoc, deleteDoc, doc, query, orderBy, onSnapshot, setDoc } from 'firebase/firestore';
 
 const AppContext = createContext();
 
@@ -31,6 +33,31 @@ export function AppProvider({ children }) {
   });
 
   const [activeTab, setActiveTab] = useState('home');
+  const [firebaseReady, setFirebaseReady] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+
+  // Firestore listener
+  useEffect(() => {
+    try {
+      const q = query(collection(db, 'matches'), orderBy('createdAt', 'desc'));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        if (!snapshot.metadata.hasPendingWrites) {
+          const fbMatches = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+          if (fbMatches.length > 0) {
+            setMatches(fbMatches);
+          }
+        }
+        setFirebaseReady(true);
+      }, (err) => {
+        console.warn('Firestore sync unavailable (offline or no permission):', err.message);
+        setFirebaseReady(false);
+      });
+      return () => unsubscribe();
+    } catch (e) {
+      console.warn('Firebase not configured yet');
+      setFirebaseReady(false);
+    }
+  }, []);
 
   // Save matches to localStorage
   useEffect(() => {
@@ -55,20 +82,36 @@ export function AppProvider({ children }) {
     document.documentElement.classList.toggle('dark', settings.theme === 'dark');
   }, [settings.theme]);
 
-  const addMatch = useCallback((match) => {
+  const addMatch = useCallback(async (match) => {
     const newMatch = {
       ...match,
       id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
       createdAt: new Date().toISOString(),
     };
+    // Add to Firestore if available
+    try {
+      await addDoc(collection(db, 'matches'), newMatch);
+    } catch (e) {
+      console.warn('Firestore add failed, saving locally:', e.message);
+    }
     setMatches(prev => [newMatch, ...prev]);
   }, []);
 
-  const updateMatch = useCallback((id, updates) => {
+  const updateMatch = useCallback(async (id, updates) => {
+    try {
+      await updateDoc(doc(db, 'matches', id), updates);
+    } catch (e) {
+      console.warn('Firestore update failed:', e.message);
+    }
     setMatches(prev => prev.map(m => m.id === id ? { ...m, ...updates } : m));
   }, []);
 
-  const deleteMatch = useCallback((id) => {
+  const deleteMatch = useCallback(async (id) => {
+    try {
+      await deleteDoc(doc(db, 'matches', id));
+    } catch (e) {
+      console.warn('Firestore delete failed:', e.message);
+    }
     setMatches(prev => prev.filter(m => m.id !== id));
   }, []);
 

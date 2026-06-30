@@ -1,13 +1,15 @@
 import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: "demo-protcombat",
+  apiKey: "AIzaSyDxCnR5LG3sdNf5bxgtzaQGge0maoz34xo",
   authDomain: "protcombat.firebaseapp.com",
   projectId: "protcombat",
-  storageBucket: "protcombat.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abc123"
+  storageBucket: "protcombat.firebasestorage.app",
+  messagingSenderId: "518272307510",
+  appId: "1:518272307510:web:ca6ce8a01dbfe1d950a397"
 };
 
 const app = initializeApp(firebaseConfig);
+export const db = getFirestore(app);
 export default app;
